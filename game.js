@@ -19,6 +19,8 @@ var config = {
 
 var game = new Phaser.Game(config);
 
+var leaderboardText; // Глобальна змінна для тексту таблиці лідерів
+
 function preload ()
 {
     // Завантаження ресурсів
@@ -97,6 +99,10 @@ function create ()
 
     this.physics.add.collider(bombs, platforms);
     this.physics.add.collider(player, bombs, hitBomb, null, this);
+
+    // Створення текстового об'єкту для таблиці лідерів
+    leaderboardText = this.add.text(600, 16, 'Leaderboard:', { fontSize: '24px', fill: '#000' });
+    updateLeaderboard(); // Оновлення таблиці лідерів
 }
 
 function update ()
@@ -126,16 +132,19 @@ function update ()
 
 function collectStar (player, star)
 {
-    // Функція для збирання зірок
     star.disableBody(true, true);
 
+    //  Add and update the score
     score += 10;
     scoreText.setText('Score: ' + score);
 
     if (stars.countActive(true) === 0)
     {
+        //  A new batch of stars to collect
         stars.children.iterate(function (child) {
+
             child.enableBody(true, child.x, 0, true, true);
+
         });
 
         var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
@@ -144,7 +153,25 @@ function collectStar (player, star)
         bomb.setBounce(1);
         bomb.setCollideWorldBounds(true);
         bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+        bomb.allowGravity = false;
+
     }
+    createBomb(); // Створюємо нову бомбу при зборі зірки
+}
+
+function createBomb()
+{
+    var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+    var bomb = bombs.create(x, 16, 'bomb');
+    bomb.setBounce(1);
+    bomb.setCollideWorldBounds(true);
+    bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+}
+
+function updateLeaderboard()
+{
+    // Таблиця лідерів
+    leaderboardText.setText('Leaderboard:\nPlayer 1: 100\nPlayer 2: 90\nPlayer 3: 80'); // Таблиця лідерів
 }
 
 function hitBomb (player, bomb)
